@@ -2,12 +2,16 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
+const bodyParser = require("body-parser");
 
+
+// hold database of preset urls includes shorturl and longurls
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
 
+// generates random string  for ShortURL
 function generateRandomString() {
     let randomString = "";
     for (let i = 0; i < 6; i++) {
@@ -19,15 +23,16 @@ function generateRandomString() {
 }
 
 
-const bodyParser = require("body-parser");
+
 const { request } = require("express");
 app.use(bodyParser.urlencoded({extended: true}));
 
-
+// sends message hello once in home page 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+// shows preset database as json object
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -65,6 +70,8 @@ app.post("/urls", (req, res) => {
   urlDatabase[newShortURL] = req.body.longURL
   res.redirect("/urls")
 })
+
+
 app.post("/urls/:shortURL/delete", (req,res)=>{
 const shortURL = req.params.shortURL
 delete urlDatabase[shortURL]
@@ -76,6 +83,10 @@ app.post("/urls/:id", (req,res)=>{
   urlDatabase[shortURL] = req.body.longURL
   res.redirect("/urls")
   });
+
+app.post("urls/login", (req,res) =>{
+
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

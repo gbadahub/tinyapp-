@@ -7,6 +7,7 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
 function generateRandomString() {
     let randomString = "";
     for (let i = 0; i < 6; i++) {
@@ -21,7 +22,6 @@ function generateRandomString() {
 const bodyParser = require("body-parser");
 const { request } = require("express");
 app.use(bodyParser.urlencoded({extended: true}));
-
 
 
 app.get("/", (req, res) => {
@@ -47,11 +47,8 @@ app.get("/urls/new", (req, res) => {
 
 
 app.get("/urls/:shortURL", (req, res) => {
-  
   const templateVars =
-  
    { shortURL: req.params.shortURL, 
-    
     // urldatabases as pbject uses shortURL as key
     longURL: urlDatabase[req.params.shortURL] };
   res.render("urls_show", templateVars);
@@ -68,6 +65,10 @@ app.post("/urls", (req, res) => {
   urlDatabase[newShortURL] = req.body.longURL
   res.redirect("/urls")
 })
+app.post("/urls/:shortURL/delete", (req,res)=>{
+const shortURL = req.params.shortURL
+delete urlDatabase[shortURL]
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

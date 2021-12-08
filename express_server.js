@@ -4,13 +4,24 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
 
 
-
-
 // hold database of preset urls includes shorturl and longurls
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
 
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
@@ -97,13 +108,21 @@ app.post("/urls/:id", (req,res)=>{
   res.redirect("/urls")
   });
 
+
   app.post("/login", (req,res) =>{
     const username = req.body.username;
     res.cookie("username",username);
     res.redirect("/urls");
   });
 
+
   app.post("/logout", (req,res) =>{
+    const username = req.body.username;
+    res.clearCookie("username",username);
+    res.redirect("/urls");
+  });
+
+  app.post("/register", (req,res) =>{
     const username = req.body.username;
     res.clearCookie("username",username);
     res.redirect("/urls");

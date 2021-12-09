@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
+const cookieParser = require('cookie-parser')
 
 
 // hold database of preset urls includes shorturl and longurls
@@ -23,18 +24,25 @@ const users = {
   }
 }
 
-const findUserByEmail = (email) => {
-  for (const userId in users) {
-    const user = users[userId];
-    if (user.email === email) {
-      return user;
+const findUserByEmail = function (user, email) {
+  for (const name in user) {
+    if (user[name].email === email) {
+      return user[name]
     }
   }
-  return null;
+  return false;
+}
+
+const findUserByPassword = function (user, password) {
+  if (user.password === password) {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+
 app.use(cookieParser());
 
 // generates random string  for ShortURL
@@ -89,7 +97,7 @@ app.get("/urls/:shortURL", (req, res) => {
   {
     shortURL: req.params.shortURL,
     // urldatabases as pbject uses shortURL as key
-    longURL: urlDatabase[req.params.shortURL], username: req.cookies["user"]
+    longURL: urlDatabase[req.params.shortURL], user: users[req.cookies["user_id"]]
   };
   res.render("urls_show", templateVars);
 });
@@ -141,16 +149,22 @@ app.post("/urls/:id", (req, res) => {
 
 
 app.post("/login", (req, res) => {
-  const username = req.body.username;
-  const user = findUserByEmail(username);
+  const email = req.body.email;
+  const password = req.body.password;
+  const user = findUserByEmail(users, email);
+console.log(user)
   if (user) {
-    res.cookie("user_id", user["id"]);
-    res.redirect("/urls");
-  } else {
-    res.status(400).send("user doesn't exist");
+    if (findUserByPassword(user, password)) {
+      res.cookie("user_id", user["id"]);
+    } else {
+      res.status(403).send('Password is incorrect')
+    }
+  }else{
+    res.status(403).send("There is no record of this user")
   }
-});
+  res.redirect("/urls")
 
+});
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
@@ -161,8 +175,8 @@ app.post("/register", (req, res) => {
   const id = generateRandomString()
   const email = req.body.email;
   const password = req.body.password;
-  const user = findUserByEmail(email)
-  console.log(user)
+  const user = findUserByEmail(users,email)
+  
   if (user) {
     return res.status(400).send('a user with that email already exists');
   }
@@ -176,7 +190,6 @@ app.post("/register", (req, res) => {
     password: password
   }
   res.cookie("user_id", id)
-
   res.redirect('/urls');
 
 });

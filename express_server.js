@@ -2,9 +2,10 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 app.set("view engine", "ejs");
+const bodyParser = require("body-parser");
 var cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs');
-
+const {findUserByEmail, findUserByPassword, fetchUsersURL, generateRandomString } = require("./helpers")
 
 app.use(cookieSession({
   name: 'session',
@@ -48,55 +49,9 @@ const users = {
 }
 
 
-
-const findUserByPassword = function (user, password) {
-  if ( bcrypt.compareSync(password, user.password)) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-const fetchUsersURL = function (urlDatabase, userID){
-  let usersURL = {}
-  for (let shortURL in urlDatabase){
-    if (urlDatabase[shortURL].userID == userID) {
-      usersURL[shortURL] = urlDatabase[shortURL].longURL
-    }
-  }
-  return usersURL
-}
-
-const fetchURLs = function (urlDatabase){
-  let allUrls = {}
-  for (let shortURL in urlDatabase){
-    allUrls[shortURL] = urlDatabase[shortURL].longURL
-  }
-  return allUrls
-}
-
-const bodyParser = require("body-parser");
-
-
-// generates random string  for ShortURL
-function generateRandomString() {
-  let randomString = "";
-  for (let i = 0; i < 6; i++) {
-    const randomCharCode = Math.floor(Math.random() * 26 + 97);
-    const randomChar = String.fromCharCode(randomCharCode);
-    randomString += randomChar;
-  }
-  return randomString;
-}
-
-
 const { request } = require("express");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// sends message hello once in home page 
-
-
-// shows preset database as json object
 
 app.get("/urls", (req, res) => {
   const userID = req.session["user_id"]
@@ -146,7 +101,6 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars =
   {
     shortURL: req.params.shortURL,
-    // urldatabases as pbject uses shortURL as key
     longURL: urlDatabase[req.params.shortURL], 
     user: users[req.session["user_id"]]
   };

@@ -7,13 +7,7 @@ const findUserByEmail = function (users, email) {
   } return undefined
 }
 
-const findUserByPassword = function (user, password) {
-  if ( bcrypt.compareSync(password, user.password)) {
-    return true;
-  } else {
-    return false;
-  }
-}
+
 
 const fetchUsersURL = function (urlDatabase, userID){
   let usersURL = {}
@@ -35,5 +29,5 @@ function generateRandomString() {
   return randomString;
 }
 
-module.exports = {findUserByEmail, findUserByPassword, fetchUsersURL, generateRandomString }
+module.exports = {findUserByEmail, fetchUsersURL, generateRandomString }
 

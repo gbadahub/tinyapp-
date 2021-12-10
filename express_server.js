@@ -5,7 +5,7 @@ app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
 var cookieSession = require('cookie-session')
 const bcrypt = require('bcryptjs');
-const {findUserByEmail, findUserByPassword, fetchUsersURL, generateRandomString } = require("./helpers")
+const {findUserByEmail, fetchUsersURL, generateRandomString } = require("./helpers")
 
 app.use(cookieSession({
   name: 'session',
@@ -34,7 +34,13 @@ const urlDatabase = {
   },
 };
 
-
+const findUserByPassword = function (user, password) {
+  if ( bcrypt.compareSync(password, user.password)) {
+    return true;
+  } else {
+    return false;
+  }
+} 
 const users = {
   "userRandomID": {
     id: "userRandomID",
@@ -69,18 +75,23 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const userId = req.session["user_id"]
-  const newUser = fetchUsersURL(urlDatabase, userId)
-  if (!newUser){
-    return res.status(403).send("Unauthorized Access")
-  } 
-    const longURL = req.body.longURL
-    const newShortURL = generateRandomString()
-    urlDatabase[newShortURL] = {
-      longURL,
-      userID: userId
+  let tempURL = generateRandomString();
+  urlDatabase[tempURL] = {
+    longURL: req.body.longURL,
+    userID: req.session["user_id"]
   }
-  res.redirect(`/urls`)
+  // const userId = req.session["user_id"]
+  // const newUser = fetchUsersURL(urlDatabase, userId)
+  // if (!newUser){
+  //   return res.status(403).send("Unauthorized Access")
+  // } 
+  //   const longURL = req.body.longURL
+  //   const newShortURL = generateRandomString()
+  //   urlDatabase[newShortURL] = {
+  //     longURL,
+  //     userID: userId
+  // }
+  res.redirect('/urls')
 })
 
 app.get("/urls/new", (req, res) => {
@@ -114,16 +125,20 @@ app.get("/u/:shortURL", (req, res) => {
     urls: urlDatabase,
     user: users[req.session["user_id"]]
   };
+  
   res.redirect(longURL);
 });
 
 
 app.post("/urls/:id", (req, res) => {
-  
-  urlDatabase[shortURL] = {
-    longURL: req.body.longURL,
-    userID: req.session["user_id"],
-  }
+  const shortURL = req.params.id
+  const newLongURL = req.body.updateURL
+  urlDatabase[shortURL].longURL = newLongURL
+  // urlDatabase[shortURL] = {
+  //   longURL: req.body.longURL,
+  //  // userID: req.session["user_id"],
+  // }
+  // urlDatabase[shortURL].longURL = req.body.longURL
   res.redirect("/urls")
 })
 
@@ -171,7 +186,7 @@ app.post("/login", (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   const user = findUserByEmail(users, email);
-  //const hashedPassword = bcrypt.hashSync(password, 10);
+  const hashedPassword = bcrypt.hashSync(password, 10);
 
   if (user) {
     if (findUserByPassword(user, password)) {

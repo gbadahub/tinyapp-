@@ -43,10 +43,10 @@ const users = {
 const findUserByEmail = function (users, email) {
   for (let name in users) {
     if (users[name].email === email) {
-      return true
+      return users[name];
     }
   }
-  return false;
+  // return undefined;
 }
 
 const findUserByPassword = function (user, password) {
@@ -105,7 +105,7 @@ app.get("/urls", (req, res) => {
   if (userID != null){
     userURLs = fetchUsersURL(urlDatabase,userID)
   } else{
-    userURLs = fetchURLs(urlDatabase)
+    return res.redirect('/login')
   }
   const templateVars = {
     urls: userURLs,
@@ -166,29 +166,41 @@ app.get("/login", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const userId = req.cookies["user_id"]
-  if (!userId){
-    return res.status(401).send("Unauthorized")
+  const newUser = fetchUsersURL(urlDatabase, userId)
+  if (!newUser){
+    return res.status(403).send("Unauthorized Access")
+  } 
+    const longURL = req.body.longURL
+    const newShortURL = generateRandomString()
+    urlDatabase[newShortURL] = {
+      longURL,
+      userID: userId
   }
-  const longURL = req.body.longURL
-  const newShortURL = generateRandomString()
-  urlDatabase[newShortURL] = {
-    longURL,
-    userID: userId
-  }
-  res.redirect("/urls")
+  res.redirect(`/urls`)
 })
 
 
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const userId = req.cookies["user_id"]
   const shortURL = req.params.shortURL;
+  if (!urlDatabase[shortURL]){
+    return res.status(403).send("Unauthorized Access")
+  } 
+  if (urlDatabase[shortURL].userID !== userId){
+    return res.status(403).send("Unauthorized Access")
+  }
   delete urlDatabase[shortURL];
   res.redirect("/urls")
 });
 
 app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id;
-  const longURLs = req.body.longURL
+  // const shortURL = req.params.id;
+  // const longURLs = req.body.longURL
+  // const userId = req.cookies["user_id"]
+  // if (!userId){
+  //   return res.status(401).send("Unauthorized")
+  // }
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.cookies['user_id']
@@ -203,6 +215,8 @@ app.post("/login", (req, res) => {
   const user = findUserByEmail(users, email);
 
   if (user) {
+    console.log("user:", user)
+    console.log("password:", password)
     if (findUserByPassword(user, password)) {
       res.cookie("user_id", user["id"]);
     } else {
@@ -217,7 +231,7 @@ app.post("/login", (req, res) => {
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
-  res.redirect("/urls");
+  res.redirect("/login");
 });
 
 app.post("/register", (req, res) => {

@@ -54,11 +54,10 @@ const users = {
   }
 }
 
-
 const { request } = require("express");
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
+// user urls page
 app.get("/urls", (req, res) => {
   const userID = req.session["user_id"]
   let userURLs;
@@ -74,17 +73,6 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-//This route is for editing the longurl;
-app.post("/urls/:shortUrl/edit", (req, res) => {
-  urlDatabase[req.params.shortUrl] = {
-    longURL: req.body.longURL,
-    userID: req.session["user_id"]
-  }
-  
-  res.redirect('/urls')
-})
-
-//this one is being used for the new Part
 app.post("/urls", (req, res) => {
  
   const userId = req.session["user_id"]
@@ -114,7 +102,6 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars =
   {
@@ -125,6 +112,23 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
+app.post("/urls/:id", (req, res) => {
+  const shortURL = req.params.id
+  const newLongURL = req.body.updateURL
+  urlDatabase[shortURL].longURL = newLongURL
+  res.redirect("/urls")
+})
+
+//editing the longurl;
+app.post("/urls/:shortUrl/edit", (req, res) => {
+  urlDatabase[req.params.shortUrl] = {
+    longURL: req.body.longURL,
+    userID: req.session["user_id"]
+  }
+  res.redirect('/urls')
+})
+
+// redirecting link
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL
   const templateVars =
@@ -136,19 +140,7 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
-
-app.post("/urls/:id", (req, res) => {
-  const shortURL = req.params.id
-  const newLongURL = req.body.updateURL
-  urlDatabase[shortURL].longURL = newLongURL
-  // urlDatabase[shortURL] = {
-  //   longURL: req.body.longURL,
-  //  // userID: req.session["user_id"],
-  // }
-  // urlDatabase[shortURL].longURL = req.body.longURL
-  res.redirect("/urls")
-})
-
+//register
 app.get("/register", (req, res) => {
   const templateVars = {
     user: users[req.session["user_id"]]
@@ -181,7 +173,7 @@ app.post("/register", (req, res) => {
 
 });
 
-
+// login page
 app.get("/login", (req, res) => {
   const templateVars = {
     user: users[req.session["user_id"]]
@@ -208,7 +200,7 @@ app.post("/login", (req, res) => {
 
 });
 
-
+// Delete url
 app.post("/urls/:shortURL/delete", (req, res) => {
   const userId = req.session["user_id"]
   const shortURL = req.params.shortURL;
@@ -222,6 +214,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls")
 });
 
+//logout 
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/login");

@@ -4,11 +4,11 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-![Getting Started](/images/Screenshot 2021-12-10 at 5.07.09 PM.png)
-!["Image of login Page"](#)
 
-![Getting Started](/images/Screenshot 2021-12-10 at 5.07.45 PM.png)
-!["Image of user's urls when logged in"](#)
+!["Image of login Page"](https://github.com/gbadahub/tinyapp-/blob/main/images/Screenshot%202021-12-10%20at%205.07.09%20PM.png)
+
+
+!["Image of user's urls when logged in"](https://github.com/gbadahub/tinyapp-/blob/main/images/Screenshot%202021-12-10%20at%205.07.45%20PM.png)
 
 ## Dependencies
 

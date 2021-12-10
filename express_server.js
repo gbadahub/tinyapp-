@@ -74,23 +74,30 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  let tempURL = generateRandomString();
-  urlDatabase[tempURL] = {
+//This route is for editing the longurl;
+app.post("/urls/:shortUrl/edit", (req, res) => {
+  urlDatabase[req.params.shortUrl] = {
     longURL: req.body.longURL,
     userID: req.session["user_id"]
   }
-  // const userId = req.session["user_id"]
-  // const newUser = fetchUsersURL(urlDatabase, userId)
-  // if (!newUser){
-  //   return res.status(403).send("Unauthorized Access")
-  // } 
-  //   const longURL = req.body.longURL
-  //   const newShortURL = generateRandomString()
-  //   urlDatabase[newShortURL] = {
-  //     longURL,
-  //     userID: userId
-  // }
+  
+  res.redirect('/urls')
+})
+
+//this one is being used for the new Part
+app.post("/urls", (req, res) => {
+ 
+  const userId = req.session["user_id"]
+  const newUser = fetchUsersURL(urlDatabase, userId)
+  if (!newUser){
+    return res.status(403).send("Unauthorized Access")
+  } else {
+    let tempURL = generateRandomString();
+      urlDatabase[tempURL] = {
+        longURL: req.body.longURL,
+        userID: req.session["user_id"]
+      };
+  }
   res.redirect('/urls')
 })
 
